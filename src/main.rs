@@ -1,6 +1,6 @@
 use actix_web::{
     error, get, guard, http::header::ContentType, middleware::Logger, web, App, HttpResponse,
-    HttpServer, Responder,
+    HttpServer, Responder, Result
 };
 use std::env;
 // use derive_more::{Display, Error};
@@ -18,13 +18,13 @@ struct User {
 }
 
 #[derive(Serialize)]
-struct UserResponse<'a> {
+struct UserResponse {
     id: i64,
-    username: &'a String,
-    email: &'a String,
+    username: String,
+    email: String,
 }
 
-async fn register(info: web::Json<User>) -> impl Responder {
+async fn register(info: web::Json<User>) ->  Result<impl Responder> {
     info!(
         "registering user {}, {}, {}",
         info.username, info.email, info.password
@@ -32,14 +32,11 @@ async fn register(info: web::Json<User>) -> impl Responder {
 
     let result = UserResponse {
         id: 10,
-        username: &info.username,
-        email: &info.email,
+        username: info.username.to_owned(),
+        email: info.email.to_owned(),
     };
 
-    let body = serde_json::to_string(&result).unwrap();
-    HttpResponse::Ok()
-        .content_type(ContentType::json())
-        .body(body)
+    Ok(web::Json(result))
 }
 
 #[get("/")]
@@ -53,6 +50,7 @@ async fn main() -> std::io::Result<()> {
     env::set_var("RUST_BACKTRACE", "1");
 
     env_logger::init();
+    
 
     let cfg = Configuration::new();
     
