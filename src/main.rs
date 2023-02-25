@@ -1,56 +1,24 @@
 use actix_web::{
-    error, get, guard, http::header::ContentType, middleware::Logger, web, App, HttpResponse,
-    HttpServer, Responder, Result
+    error, get, guard,middleware::Logger, web, App, HttpResponse,
+    HttpServer, Responder
 };
 use std::env;
-// use derive_more::{Display, Error};
 use log::info;
-use serde::{Deserialize, Serialize};
 
 mod config;
 use config::Configuration;
 
-#[derive(Deserialize)]
-struct User {
-    username: String,
-    email: String,
-    password: String,
-}
+mod users;
+use users::register;
 
-#[derive(Serialize)]
-struct UserResponse {
-    id: i64,
-    username: String,
-    email: String,
-}
-
-async fn register(info: web::Json<User>) ->  Result<impl Responder> {
-    info!(
-        "registering user {}, {}, {}",
-        info.username, info.email, info.password
-    );
-
-    let result = UserResponse {
-        id: 10,
-        username: info.username.to_owned(),
-        email: info.email.to_owned(),
-    };
-
-    Ok(web::Json(result))
-}
-
-#[get("/")]
-async fn hello() -> impl Responder {
-    HttpResponse::Ok().body("Hello world!")
-}
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env::set_var("RUST_LOG", "info");
+    env::set_var("RUST_LOG", "debug");
     env::set_var("RUST_BACKTRACE", "1");
 
     env_logger::init();
-    
+
 
     let cfg = Configuration::new();
     
@@ -75,4 +43,10 @@ async fn main() -> std::io::Result<()> {
     .bind(("127.0.0.1", cfg.port))?
     .run()
     .await
+}
+
+
+#[get("/")]
+async fn hello() -> impl Responder {
+    HttpResponse::Ok().body("Hello world!")
 }
