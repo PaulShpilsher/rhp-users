@@ -23,8 +23,8 @@ async fn register(info: web::Json<User>) -> impl Responder {
 
     let result = UserResponse {
         id: 10,
-        username: info.username.clone(),
-        email: info.email.clone()
+        username: info.username.to_owned(),
+        email: info.email.to_owned()
     };
 
     let body = serde_json::to_string(&result).unwrap();
