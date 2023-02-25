@@ -9,7 +9,6 @@ mod config;
 use config::Configuration;
 
 mod users;
-use users::register;
 
 
 #[actix_web::main]
@@ -37,7 +36,7 @@ async fn main() -> std::io::Result<()> {
             web::scope("/api")
                 .guard(guard::Header("content-type", "application/json"))
                 .app_data(json_config)
-                .route("/register", web::post().to(register)),
+                .route("/register", web::post().to(users::register)),
         )
     })
     .bind(("127.0.0.1", cfg.port))?
