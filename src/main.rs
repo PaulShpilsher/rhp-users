@@ -1,6 +1,8 @@
 use actix_web::{
-    error, get, http::header::ContentType, web, App, HttpResponse, HttpServer, Responder, middleware::Logger,
+    error, get, http::header::ContentType, middleware::Logger, web, App, HttpResponse, HttpServer,
+    Responder,
 };
+use std::{env,option_env};
 // use derive_more::{Display, Error};
 use log::info;
 use serde::{Deserialize, Serialize};
@@ -43,9 +45,16 @@ async fn hello() -> impl Responder {
 }
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    std::env::set_var("RUST_LOG", "info");
-    std::env::set_var("RUST_BACKTRACE", "1");
+    env::set_var("RUST_LOG", "info");
+    env::set_var("RUST_BACKTRACE", "1");
+
     env_logger::init();
+
+    let port = option_env!("PORT")
+        .unwrap_or("8180")
+        .parse::<u16>()
+        .unwrap();
+    info!("using port {}", port);
 
     HttpServer::new(|| {
         let json_config = web::JsonConfig::default()
@@ -63,7 +72,7 @@ async fn main() -> std::io::Result<()> {
                 .route("/register", web::post().to(register)),
         )
     })
-    .bind(("127.0.0.1", 8180))?
+    .bind(("127.0.0.1", port))?
     .run()
     .await
 }
