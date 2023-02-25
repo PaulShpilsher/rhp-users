@@ -1,11 +1,14 @@
 use actix_web::{
-    error, get, http::header::ContentType, middleware::Logger, web, App, HttpResponse, HttpServer,
-    Responder,
+    error, get, guard, http::header::ContentType, middleware::Logger, web, App, HttpResponse,
+    HttpServer, Responder,
 };
-use std::{env,option_env};
+use std::env;
 // use derive_more::{Display, Error};
 use log::info;
 use serde::{Deserialize, Serialize};
+
+mod config;
+use config::Configuration;
 
 #[derive(Deserialize)]
 struct User {
@@ -43,6 +46,7 @@ async fn register(info: web::Json<User>) -> impl Responder {
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
 }
+
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
     env::set_var("RUST_LOG", "info");
@@ -50,12 +54,9 @@ async fn main() -> std::io::Result<()> {
 
     env_logger::init();
 
-    let port = option_env!("PORT")
-        .unwrap_or("8180")
-        .parse::<u16>()
-        .unwrap();
-    info!("using port {}", port);
-
+    let cfg = Configuration::new();
+    
+    info!("listenning on port {}", cfg.port);
     HttpServer::new(|| {
         let json_config = web::JsonConfig::default()
             .limit(4096)
@@ -68,11 +69,12 @@ async fn main() -> std::io::Result<()> {
 
         App::new().wrap(logger).service(hello).service(
             web::scope("/api")
+                .guard(guard::Header("content-type", "application/json"))
                 .app_data(json_config)
                 .route("/register", web::post().to(register)),
         )
     })
-    .bind(("127.0.0.1", port))?
+    .bind(("127.0.0.1", cfg.port))?
     .run()
     .await
 }
