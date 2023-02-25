@@ -11,10 +11,10 @@ struct User {
 }
 
 #[derive(Serialize)]
-struct UserResponse {
+struct UserResponse<'a> {
     id: i64,
-    username: String,
-    email: String,
+    username: &'a String,
+    email: &'a String,
 }
 
 async fn register(info: web::Json<User>) -> impl Responder {
@@ -23,8 +23,8 @@ async fn register(info: web::Json<User>) -> impl Responder {
 
     let result = UserResponse {
         id: 10,
-        username: info.username.to_owned(),
-        email: info.email.to_owned()
+        username: &info.username,
+        email: &info.email
     };
 
     let body = serde_json::to_string(&result).unwrap();
