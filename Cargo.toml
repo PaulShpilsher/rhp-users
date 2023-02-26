@@ -7,9 +7,13 @@ edition = "2021"
 
 [dependencies]
 actix-web = "4"
+config = "0.13.1"
+deadpool-postgres = { version = "0.10.2", features = ["serde"] }
 serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0"
 env_logger = "0.8"
 log = "0.4"
 derive_more = "0.99.0"
-envy = "0.4"
+tokio-pg-mapper = "0.2.0"
+tokio-pg-mapper-derive = "0.2.0"
+tokio-postgres = "0.7.6"
