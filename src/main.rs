@@ -1,7 +1,7 @@
 use actix_web::{
     error, get, guard, middleware::Logger, web, App, HttpResponse, HttpServer, Responder,
 };
-use log::info;
+use deadpool_postgres::Pool;
 use tokio_postgres::NoTls;
 
 mod config;
@@ -14,10 +14,10 @@ async fn main() -> std::io::Result<()> {
     let cfg = config::Config::from_env().unwrap();
     let pool = cfg.pg.create_pool(None, NoTls).unwrap();
 
-    {   // test db connection
-        let _ = (pool.get().await).unwrap();
-    }
-    info!("listenning on port {}", cfg.port);
+    // test db connection
+    test_db_connection(pool.clone()).await;
+
+    log::info!("listenning on port {}", cfg.port);
     HttpServer::new(move || {
         let json_config = web::JsonConfig::default()
             .limit(4096)
@@ -44,4 +44,11 @@ async fn main() -> std::io::Result<()> {
 #[get("/")]
 async fn hello() -> impl Responder {
     HttpResponse::Ok().body("Hello world!")
+}
+
+async fn test_db_connection(pool: Pool) {
+    match pool.get().await {
+        Ok(_) => log::info!("Connected to database"),
+        Err(error) => panic!("Failed to connect to database {}", error)
+    }
 }
