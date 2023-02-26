@@ -1,19 +1,15 @@
-use envy;
-use serde::Deserialize;
+use config;
 
-#[derive(Deserialize, Debug)]
-pub struct Configuration {
-    #[serde(default = "default_port")]
-    pub port: u16
+#[derive(serde::Deserialize, Debug)]
+pub struct Config {
+    pub port: u16,
 }
 
-impl Configuration {
-    pub fn new() -> Configuration {
-        let c = envy::from_env::<Configuration>().expect("Please provide PORT env var");
-        c
+impl Config {
+    pub fn from_env() -> Result<Self, config::ConfigError> {
+        config::Config::builder()
+            .add_source(::config::Environment::default())
+            .build()?
+            .try_deserialize()
     }
-}
-
-fn default_port() -> u16 {
-    8181
 }

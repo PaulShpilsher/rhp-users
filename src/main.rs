@@ -2,24 +2,17 @@ use actix_web::{
     error, get, guard,middleware::Logger, web, App, HttpResponse,
     HttpServer, Responder
 };
-use std::env;
 use log::info;
 
-mod config;
-use config::Configuration;
-
 mod users;
+mod config;
 
 
 #[actix_web::main]
 async fn main() -> std::io::Result<()> {
-    env::set_var("RUST_LOG", "debug");
-    env::set_var("RUST_BACKTRACE", "1");
-
     env_logger::init();
 
-
-    let cfg = Configuration::new();
+    let cfg = config::Config::from_env().unwrap();
     
     info!("listenning on port {}", cfg.port);
     HttpServer::new(|| {
