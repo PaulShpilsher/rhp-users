@@ -3,6 +3,7 @@ use config;
 #[derive(serde::Deserialize, Debug)]
 pub struct Config {
     pub port: u16,
+    pub pg: deadpool_postgres::Config
 }
 
 impl Config {
