@@ -1,5 +1,5 @@
 use actix_web::{web, Responder, Result};
-use log::{debug, info};
+use log::{debug};
 use serde::{Deserialize, Serialize};
 
 #[derive(Deserialize)]

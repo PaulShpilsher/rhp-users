@@ -1,6 +1,6 @@
 use config;
 
-#[derive(serde::Deserialize, Debug)]
+#[derive(serde::Deserialize, Debug, Clone)]
 pub struct Config {
     pub port: u16,
     pub pg: deadpool_postgres::Config
